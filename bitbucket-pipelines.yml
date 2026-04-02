@@ -1,0 +1,37 @@
+# bitbucket-pipelines.yml
+# Use an image that has Python and Git pre-installed
+image: python:3.10
+
+pipelines:
+  # The 'default' pipeline runs on every push to a branch
+  default:
+    - step:
+        name: Automated Code Review with Gemini
+        # Define the cache to store Python libraries
+        caches:
+          - pip
+        # KEY: Define the artifacts path so the Python script's output is uploaded
+        artifacts:
+          - corrected_code_artifacts/**
+        script:
+          # 1. Install Dependencies
+          - echo "Installing Google GenAI SDK..."
+          - pip install google-genai
+          
+          # 2. Run the Python script (it handles file finding and artifact saving)
+          - python gemini_reviewer.py
+
+  # You can also add a pipeline that runs only on Pull Requests for better workflow
+  pull-requests:
+    '**':
+      - step:
+          name: Pull Request Code Review with Gemini
+          caches:
+            - pip
+          # KEY: Define the artifacts path for PRs too
+          artifacts:
+            - corrected_code_artifacts/**
+          script:
+            # Installation and execution are combined here too
+            - pip install google-genai
+            - python gemini_reviewer.py
